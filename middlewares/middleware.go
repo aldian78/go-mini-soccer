@@ -53,7 +53,7 @@ func RateLimiter(lmt *limiter.Limiter) gin.HandlerFunc {
 	}
 }
 
-func extractBeareToken(token string) string {
+func extractBearerToken(token string) string {
 	arrayToken := strings.Split(token, " ")
 	if len(arrayToken) == 2 {
 		return arrayToken[1]
@@ -82,18 +82,21 @@ func validateAPIKey(c *gin.Context) error {
 	resultHash := hex.EncodeToString(hash.Sum(nil))
 
 	if apiKey != resultHash {
+		logrus.Infof("api key %s !sama result hash %s", apiKey, resultHash)
 		return errConstant.ErrUnauthorized
 	}
 	return nil
 }
 
-func validateBeareToken(c *gin.Context, token string) error {
+func validateBearerToken(c *gin.Context, token string) error {
 	if !strings.Contains(token, "Bearer") {
+		logrus.Infof("token tidak bearer")
 		return errConstant.ErrUnauthorized
 	}
 
-	tokenString := extractBeareToken(token)
+	tokenString := extractBearerToken(token)
 	if tokenString == "" {
+		logrus.Infof("token string kosong %v", tokenString)
 		return errConstant.ErrUnauthorized
 	}
 
@@ -109,6 +112,7 @@ func validateBeareToken(c *gin.Context, token string) error {
 	})
 
 	if err != nil || !tokenJwt.Valid {
+		logrus.Infof("token jwt tidak valid %v", tokenJwt.Valid)
 		return errConstant.ErrUnauthorized
 	}
 
@@ -123,12 +127,13 @@ func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var err error
 		token := c.GetHeader(constants.Authorization)
-		if token != "" {
+		logrus.Infof("checkk token %v", token)
+		if token == "" {
 			responseUnauthorized(c, errConstant.ErrUnauthorized.Error())
 			return
 		}
 
-		err = validateBeareToken(c, token)
+		err = validateBearerToken(c, token)
 		if err != nil {
 			responseUnauthorized(c, err.Error())
 			return

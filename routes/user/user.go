@@ -26,5 +26,5 @@ func (u *UserRoute) Run() {
 	group.GET("/:uuid", middlewares.Authenticate(), u.controller.GetUserController().GetUserByUUID)
 	group.POST("/login", u.controller.GetUserController().Login)
 	group.POST("/register", u.controller.GetUserController().Register)
-	group.PUT("/uuid", u.controller.GetUserController().Update)
+	group.PUT("/:uuid", middlewares.Authenticate(), u.controller.GetUserController().Update)
 }

@@ -12,13 +12,13 @@ type UserResponse struct {
 	Name        string    `json:"name"`
 	Username    string    `json:"username"`
 	Email       string    `json:"email"`
-	Role        string    `json:"role"`
+	Role        string    `json:"role,omitempty"`
 	PhoneNumber string    `json:"phoneNumber"`
 }
 
 type LoginResponse struct {
-	User  string `json:"user"`
-	Token string `json:"token"`
+	User  UserResponse `json:"user"`
+	Token string       `json:"token"`
 }
 
 type RegisterRequest struct {

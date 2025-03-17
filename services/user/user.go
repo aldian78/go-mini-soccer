@@ -64,14 +64,13 @@ func (u *UserService) Login(ctx context.Context, req *dto.LoginRequest) (*dto.Lo
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(config.Config.JwtSecretKey))
 	if err != nil {
 		return nil, err
 	}
-
 	response := &dto.LoginResponse{
-		User:  *&data.Username,
+		User:  *data,
 		Token: tokenString,
 	}
 
@@ -121,11 +120,12 @@ func (u *UserService) Register(ctx context.Context, req *dto.RegisterRequest) (*
 	}
 
 	user, err := u.repository.GetUser().Register(ctx, &dto.RegisterRequest{
-		Name:     req.Name,
-		Username: req.Username,
-		Password: string(hashPassword),
-		Email:    req.Email,
-		RoleID:   constants.Customer,
+		Name:        req.Name,
+		Username:    req.Username,
+		Password:    string(hashPassword),
+		PhoneNumber: req.PhoneNumber,
+		Email:       req.Email,
+		RoleID:      constants.Customer,
 	})
 
 	if err != nil {
@@ -171,7 +171,7 @@ func (u *UserService) Update(ctx context.Context, request *dto.UpdateRequest, uu
 		}
 	}
 
-	isEmailExist := u.isUsernameExist(ctx, request.Email)
+	isEmailExist := u.isEmailExist(ctx, request.Email)
 	if isEmailExist && user.Email != request.Email {
 		checkEmail, err = u.repository.GetUser().FindByEmail(ctx, request.Username)
 		if err != nil {
